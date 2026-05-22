@@ -20,32 +20,31 @@
         .stat-card:hover {
             transform: scale(1.02);
         }
-        footer {
-            margin-top: 50px;
-            padding: 20px;
-            text-align: center;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }
-        .search-highlight {
-            background-color: #ffc107;
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
         .btn-export {
             transition: all 0.2s;
         }
         .btn-export:hover {
             transform: scale(1.02);
         }
+        footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-4">
-        <!-- Заголовок -->
-        <div class="text-center mb-4">
-            <h1 class="display-4">📚 Личная библиотека</h1>
-            <p class="lead">Каталогизация книг с автоматическим заполнением метаданных</p>
+        <!-- Верхняя панель с пользователем -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h1 class="display-6 mb-0">📚 Личная библиотека</h1>
+                <p class="text-muted mb-0">Добро пожаловать, {{ user.username }} ({{ 'администратор' if user.role == 'admin' else 'пользователь' }})</p>
+            </div>
+            <div>
+                <a href="/logout" class="btn btn-outline-danger">🚪 Выйти</a>
+            </div>
         </div>
 
         <!-- Блок статистики -->
@@ -84,7 +83,8 @@
             </div>
         </div>
 
-        <!-- Форма добавления книги -->
+        <!-- Форма добавления книги (только для администратора) -->
+        {% if user.role == 'admin' %}
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0">➕ Добавить книгу по ISBN</h5>
@@ -103,6 +103,7 @@
                 </form>
             </div>
         </div>
+        {% endif %}
 
         <!-- Строка поиска -->
         <div class="card mb-4">
@@ -129,10 +130,10 @@
             </div>
         </div>
 
-        <!-- Сообщения об успехе/ошибке -->
-        {% if message %}
-        <div class="alert alert-{{ message_type }} alert-dismissible fade show" role="alert">
-            {{ message }}
+        <!-- Сообщения об ошибках -->
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endif %}
@@ -141,9 +142,11 @@
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
             <h3>📖 Книги в библиотеке ({{ books|length }})</h3>
             <div>
+                {% if user.role == 'admin' %}
                 <a href="/export" class="btn btn-outline-success btn-export me-2">
                     📥 Экспорт в CSV
                 </a>
+                {% endif %}
                 <a href="/" class="btn btn-outline-secondary btn-export">
                     🔄 Показать всё
                 </a>
@@ -162,9 +165,11 @@
                             <strong>Год:</strong> {{ book.publication_year or '—' }}<br>
                             <strong>ISBN:</strong> {{ book.isbn or '—' }}
                         </p>
+                        {% if user.role == 'admin' %}
                         <form action="/delete_book/{{ book.book_id }}" method="post" onsubmit="return confirm('Удалить книгу «{{ book.title }}»?')">
                             <button type="submit" class="btn btn-sm btn-danger mt-2 w-100">🗑 Удалить книгу</button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -182,12 +187,10 @@
             {% endfor %}
         </div>
 
-        <!-- Пагинация (если нужно, добавим позже) -->
-
         <!-- Футер -->
         <footer>
             <p>📚 Личная библиотека | Автоматическое заполнение из OpenLibrary API | Всего книг: {{ books|length }}</p>
-            <p class="small text-muted">© 2024 Личная библиотека. Все права защищены.</p>
+            <p class="small text-muted">© 2026 Личная библиотека. Все права защищены.</p>
         </footer>
     </div>
 
